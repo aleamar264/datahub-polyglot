@@ -15,7 +15,7 @@ metadata:
   namespace: orders-ingress
   annotations:
     cert-manager.io/cluster-issuer: http-01-production
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure, web
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure, web, test-port
     traefik.ingress.kubernetes.io/router.middlewares: traefik-test-ratelimit@kubernetescrd
   labels:
     name: orders-ingress

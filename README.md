@@ -255,3 +255,109 @@ defaultArgs:
   - --kubelet-use-node-status-port
   - --metric-resolution=15s
 ```
+
+## K8S files
+
+```shell
+.
+├── storage
+│   └── storage.yaml
+├── metallb
+│   └── ip.yaml
+└── others
+    ├── prom.yaml
+    ├── grafana.yaml
+    └── jaeger.yaml
+```
+
+The storage file, is used only if you want to create a new storage with some specific rules, if the standard storageClass work, don't launch this file.
+
+### MetalLB
+
+This create a pool of IP's and the communication to the L2 layer.
+
+```yaml
+---
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: my-pool
+  namespace: metallb
+spec:
+  addresses:
+    - 192.168.10.0/24
+    - 192.168.1.240-192.168.1.250
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: example
+  namespace: metallb
+spec:
+  ipAddressPools:
+    - my-pool
+```
+
+If you remember in the line [[CodeBase/Backend/datahub/Kubernetes#Traefik|Kubernetes]] for the service annotations, said **_my-pool_** with this annotation **metallb.universe.tf/address-pool**, for that, after create the helm pod of MetalLB, run this yaml.
+
+```shell
+kubectl apply -f infra/k8s/metallb
+```
+
+This look for all the files yaml with the kubernetes format.
+
+### Others
+
+In this file we can found the ingress for **grafana**, **jager** and **prometheus**.
+
+I will only explain 1 file, because, the others are the same
+
+```yaml
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: grafana
+  namespace: monitoring
+spec:
+  entryPoints:
+    - web
+    - test-port
+  routes:
+    - kind: Rule
+      match: "Host(`localhost`) && PathPrefix(`/grafana`)"
+      # middlewares:
+      #   - name: grafana-prometheus-strip
+      #     namespace: traefik
+      services:
+        - kind: Service
+          name: kube-prometheus-stackr-grafana
+          port: 80
+```
+
+The important thing here is, the namespace of the services, this can be found in the file of terraform, where we defined the attributes for the resources. In this case is monitoring. To know the services name and the port to expose we can use
+
+```shell
+$ kubectl get svc -n monitoring
+NAME                                              TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                                                    AGE
+alertmanager-operated                             ClusterIP   None            <none>        9093/TCP,9094/TCP,9094/UDP                                 6h18m
+jaeger-cassandra                                  ClusterIP   10.96.110.126   <none>        9042/TCP                                                   6h19m
+jaeger-cassandra-headless                         ClusterIP   None            <none>        7000/TCP,7001/TCP,7199/TCP,9042/TCP                        6h19m
+jaeger-collector                                  ClusterIP   10.96.169.80    <none>        14250/TCP,14268/TCP,9411/TCP,14269/TCP,4317/TCP,4318/TCP   6h19m
+jaeger-query                                      ClusterIP   10.96.251.48    <none>        16686/TCP,16687/TCP                                        6h19m
+kube-prometheus-stackr-alertmanager               ClusterIP   10.96.248.49    <none>        9093/TCP,8080/TCP                                          6h18m
+kube-prometheus-stackr-grafana                    ClusterIP   10.96.49.62     <none>        80/TCP                                                     6h18m
+kube-prometheus-stackr-kube-state-metrics         ClusterIP   10.96.167.74    <none>        8080/TCP                                                   6h18m
+kube-prometheus-stackr-operator                   ClusterIP   10.96.35.175    <none>        443/TCP                                                    6h18m
+kube-prometheus-stackr-prometheus                 ClusterIP   10.96.126.155   <none>        9090/TCP,8080/TCP                                          6h18m
+kube-prometheus-stackr-prometheus-node-exporter   ClusterIP   10.96.129.192   <none>        9100/TCP                                                   6h18m
+prometheus-operated                               ClusterIP   None            <none>        9090/TCP                                                   6h18m
+```
+
+With this we can see all the services for that namespace, and if we look for the grafana services, we can found this
+
+```shell
+$ NAME                            TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)  AGE
+kube-prometheus-stackr-grafana                    ClusterIP   10.96.49.62     <none>        80/TCP   6h18m
+```
+
+That is the port and the service name for this IngressRoute.

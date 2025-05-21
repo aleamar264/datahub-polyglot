@@ -1,0 +1,40 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-deployment
+  namespace: "users"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: users
+  template:
+    metadata:
+      labels:
+        app: users
+    spec:
+      containers:
+        - name: users
+          # image: docker.io/library/cognito:latest
+          # imagePullPolicy: Never
+          image: docker-image
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "900m"
+          ports:
+            - name: http
+              containerPort: 8000
+          readinessProbe:
+            httpGet:
+              port: 8000
+              path: /users/docs
+            initialDelaySeconds: 15
+          livenessProbe:
+            httpGet:
+              port: 8000
+              path: /users/docs
+            initialDelaySeconds: 15
+            periodSeconds: 15

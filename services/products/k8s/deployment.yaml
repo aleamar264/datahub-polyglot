@@ -1,0 +1,40 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: products-deployment
+  namespace: "products"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: products
+  template:
+    metadata:
+      labels:
+        app: products
+    spec:
+      containers:
+        - name: products
+          # image: docker.io/library/cognito:latest
+          # imagePullPolicy: Never
+          image: docker-image
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "900m"
+          ports:
+            - name: http
+              containerPort: 8000
+          readinessProbe:
+            httpGet:
+              port: 8000
+              path: /products/docs
+            initialDelaySeconds: 15
+          livenessProbe:
+            httpGet:
+              port: 8000
+              path: /products/docs
+            initialDelaySeconds: 15
+            periodSeconds: 15

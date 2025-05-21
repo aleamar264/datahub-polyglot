@@ -1,0 +1,12 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+
+package health;
+
+service GetHealt{
+    rpc Health(google.protobuf.Empty) returns (SendHealth);
+}
+
+message SendHealth{
+    string health = 1;
+}

@@ -1,0 +1,149 @@
+---
+deployment:
+  replicas: null
+resources:
+  requests:
+    cpu: "100m"
+    memory: "50Mi"
+  limits:
+    cpu: "300m"
+    memory: "150Mi"
+autoscaling:
+  enabled: true
+  maxReplicas: 3
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+service:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  annotations:
+    metallb.universe.tf/address-pool: "my-pool"
+    metallb.universe.tf/allow-shared-ip: "traefik-shared"
+
+ingressClass:
+  name: traefik
+  enabled: true
+  isDefaultClass: true
+providers:
+  kubernetesCRD:
+    allowCrossNamespace: true
+    allowExternalNameServices: true
+
+# logs
+logs:
+  general:
+    level: DEBUG
+
+# Redirect ports
+ports:
+  web:
+    expose:
+      default: true
+  websecure:
+    tls:
+      enabled: true
+  metrics:
+    expose:
+      default: true
+  test-port:
+    expose:
+      default: true
+    entryPoint: test-port
+    port: 8081
+
+entryPoints:
+  test-port:
+    address: "0.0.0.0:8081"
+
+# Dashboard
+# Create an IngressRoute for the dashboard
+ingressRoute:
+  dashboard:
+    enabled: true
+    # Custom match rule with host domain
+    matchRule: "Host(`localhost`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+    entryPoints: ["web", "test-port"]
+    # Add custom middlewares : authentication and redirection
+    middlewares:
+      - name: traefik-dashboard-auth
+
+extraObjects:
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: traefik-dashboard-auth-secret
+    type: kubernetes.io/basic-auth
+    stringData:
+      username: admin
+      password: admin
+
+  - apiVersion: traefik.io/v1alpha1
+    kind: Middleware
+    metadata:
+      name: traefik-dashboard-auth
+    spec:
+      basicAuth:
+        secret: traefik-dashboard-auth-secret
+
+# env
+env:
+  - name: OTEL_PROPAGATORS
+    value: "jaeger"
+
+# Tracing
+# tracing.otlp.http.enabled
+tracing:
+  sampleRate: 0.6
+  serviceName: traefik
+  otlp:
+    enabled: true
+    http:
+      enabled: true
+      endpoint: http://jaeger-collector.monitoring.svc.cluster.local:4318/v1/traces # Correct HTTP OTLP endpoint
+
+# metrics
+metrics:
+  prometheus:
+    addEntryPointsLabels: true
+    addRoutersLabels: true
+    addServicesLabels: true
+    buckets: "0.1,0.3,1.2,5.0"
+
+    service:
+      enabled: true
+    disableAPICheck: false
+    serviceMonitor:
+      enabled: true
+      metricRelabelings:
+        - sourceLabels: [__name__]
+          separator: ;
+          regex: ^fluentd_output_status_buffer_(oldest|newest)_.+
+          replacement: $1
+          action: drop
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_node_name]
+          separator: ;
+          regex: ^(.*)$
+          targetLabel: nodename
+          replacement: $1
+          action: replace
+      jobLabel: traefik
+      interval: 30s
+      honorLabels: true
+    prometheusRule:
+      enabled: true
+      rules:
+        - alert: TraefikDown
+          expr: up{job="traefik"} == 0
+          for: 5m
+          labels:
+            context: traefik
+            severity: warning
+          annotations:
+            summary: "Traefik Down"
+            description: "{{ $labels.pod }} on {{ $labels.nodename }} is down"

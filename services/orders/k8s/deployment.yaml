@@ -1,0 +1,40 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders-deployment
+  namespace: "orders"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orders
+  template:
+    metadata:
+      labels:
+        app: orders
+    spec:
+      containers:
+        - name: orders
+          # image: docker.io/library/cognito:latest
+          # imagePullPolicy: Never
+          image: docker-image
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "900m"
+          ports:
+            - name: http
+              containerPort: 8000
+          readinessProbe:
+            httpGet:
+              port: 8000
+              path: /orders/docs
+            initialDelaySeconds: 15
+          livenessProbe:
+            httpGet:
+              port: 8000
+              path: /orders/docs
+            initialDelaySeconds: 15
+            periodSeconds: 15

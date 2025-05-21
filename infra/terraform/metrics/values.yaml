@@ -1,0 +1,8 @@
+---
+defaultArgs:
+  - --cert-dir=/tmp
+  - --kubelet-insecure-tls # Bypass self-signed cert verification
+  - --kubelet-preferred-address-types=InternalIP,Hostname
+  - --kubelet-use-node-status-port # Use node status port for metrics
+  - --metric-resolution=15s # Set metrics resolution
+  - --secure-port=10250 # Use kubelet secure port

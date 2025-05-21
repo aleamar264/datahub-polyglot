@@ -1,1 +1,0 @@
-{"Modules":[{"Key":"","Source":"","Dir":"."},{"Key":"metallb","Source":"./metallb_tf","Dir":"metallb_tf"},{"Key":"metrics","Source":"./metrics","Dir":"metrics"},{"Key":"prom","Source":"./prom","Dir":"prom"},{"Key":"tracing","Source":"./tracing","Dir":"tracing"},{"Key":"traefik","Source":"./traefik_tf","Dir":"traefik_tf"}]}

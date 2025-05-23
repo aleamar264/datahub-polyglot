@@ -12,9 +12,9 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: users-ingress
-  namespace: users-ingress
+  namespace: users
   annotations:
-    cert-manager.io/cluster-issuer: http-01-production
+    # cert-manager.io/cluster-issuer: http-01-production
     traefik.ingress.kubernetes.io/router.entrypoints: websecure, web, test-port
     traefik.ingress.kubernetes.io/router.middlewares: traefik-test-ratelimit@kubernetescrd
   labels:

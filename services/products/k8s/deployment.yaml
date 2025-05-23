@@ -18,8 +18,8 @@ spec:
         - name: products
           # image: docker.io/library/cognito:latest
           # imagePullPolicy: Never
-          image: docker-image
-          imagePullPolicy: Always
+          image: datahub_polyglot_products:latest
+          imagePullPolicy: IfNotPresent
           resources:
             limits:
               memory: "512Mi"

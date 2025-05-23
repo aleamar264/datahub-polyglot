@@ -22,9 +22,11 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 FROM python:3.13-slim
 
+WORKDIR /app
+
 # Copy the environment, but not the source code
 COPY --from=builder --chown=app:app /app/.venv /app/.venv
 COPY src .
 
 # Run the application
-CMD ["/app/.venv/granian", "--interface", "asgi", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--threads", "2", "app.main:app"]
+CMD ["/app/.venv/bin/granian", "--interface", "asgi", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "main:app"]

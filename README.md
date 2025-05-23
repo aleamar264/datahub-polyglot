@@ -25,7 +25,6 @@ In this case the Infrastructure folder is:
 ```shell
 .
 ├── variables.tf
-├── postgres.tf
 ├── traefik_tf
 │   ├── traefik.tf
 │   └── traefik.yaml
@@ -41,7 +40,14 @@ In this case the Infrastructure folder is:
 ├── metrics
 │   ├── values.yaml
 │   └── main.tf
+├── postgresql
+│   ├── values.yaml
+│   └── postgres.tf
+├── strimzi
+│   ├── main.tf
+│   └── values.yaml
 ├── main.tf
+├── terraform.tfstate.backup
 └── terraform.tfstate
 ```
 
@@ -149,6 +155,10 @@ grafana:
       labelValue: "1"
 prometheus:
   prometheusSpec:
+	# This section is for PodMonitoring files in yaml format
+    podMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelector: {}
+    podMonitorNamespaceSelector: {}
     externalUrl: https://localhost/prometheus
     routePrefix: /prometheus
     additionalScrapeConfigs:
@@ -181,6 +191,7 @@ prometheus-node-exporter:
   hostRootFsMount:
     enabled: false
     mountPropagation: HostToContainer
+
 ```
 
 This part let to know to grafana that can use some persistence storage to save data. The _storageClassName_ is from the pvc and pv from kubernetes, like this time is from local we use standard, in other case could be _gp2_ or the storage in that moment.
@@ -255,6 +266,70 @@ defaultArgs:
   - --kubelet-use-node-status-port
   - --metric-resolution=15s
 ```
+
+### Strimzi
+
+Here you declare that you want to use metrics for prometheus and watch any namespaces for kafka programs
+
+```yaml
+replicas: 2
+watchAnyNamespace: true
+
+metrics:
+  kafka:
+    enabled: true
+  topicOperator:
+    enabled: true
+  userOperator:
+    enabled: true
+serviceMonitor:
+  enabled: true
+  namespace: monitoring # where your Prometheus lives
+
+# (Optional) Tolerate scheduling on control-plane nodes, etc.
+# This is when you are using KinD
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule
+```
+
+After you create the operator, now you need to create the kafka. Please refer to `infra/k8s/strimzi/kafka-cluster.yaml`
+
+Now, we want also get the metrics of the kafka cluster, the performance and so on, so, we need to know which is the port of the metrics.
+
+To get all the ports from strimzi (kafka)
+
+```shell
+kubectl get pod -l strimzi.io/cluster=my-cluster,strimzi.io/kind=Kafka \
+  -n strimzi -o jsonpath='{.items[0].spec.containers[*].ports}'
+
+```
+
+tcp-prometheus, is the port which carry all the metrics, with this, we can create the pod-monitor services.
+
+```yaml
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: my-cluster-dual-role
+  namespace: monitoring
+  labels:
+    release: prometheus # match this in prometheusSpec.podMonitorSelector
+spec:
+  namespaceSelector:
+    matchNames: ["strimzi"]
+  selector:
+    matchLabels:
+      strimzi.io/cluster: my-cluster
+      strimzi.io/kind: Kafka
+  podMetricsEndpoints:
+    - port: tcp-prometheus
+      path: /metrics
+      interval: 30s
+```
+
+If you want to know which metrics we are retrieven, please refer to `infra/k8s/strimzi/metrics.yaml`
 
 ## K8S files
 

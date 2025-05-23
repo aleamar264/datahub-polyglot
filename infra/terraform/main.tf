@@ -26,3 +26,13 @@ module "traefik" {
   depends_on = [module.metallb, module.prom, module.tracing]
 
 }
+
+module "postgresql" {
+  source = "./postgresql"
+
+}
+
+module "kafka" {
+  source = "./strimzi"
+
+}

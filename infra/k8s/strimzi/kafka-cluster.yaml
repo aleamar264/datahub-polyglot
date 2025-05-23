@@ -1,0 +1,105 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaNodePool
+metadata:
+  name: dual-role
+  namespace: strimzi
+  labels:
+    strimzi.io/cluster: my-cluster
+spec:
+  replicas: 2
+  roles:
+    - controller
+    - broker
+  storage:
+    type: jbod
+    volumes:
+      - id: 0
+        type: persistent-claim
+        size: 1Gi
+        deleteClaim: false
+        kraftMetadata: shared
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: my-cluster
+  namespace: strimzi
+  annotations:
+    # enable KRaft (ZooKeeper-less) mode
+    strimzi.io/kraft: "enabled"
+    # optional: enable node pool support
+    strimzi.io/node-pools: "enabled"
+spec:
+  kafka:
+    # number of broker-only nodes
+    listeners:
+      - name: plain
+        port: 9092
+        type: internal
+        tls: false
+      # Only with domain
+      #   configuration:
+      #     useServiceDnsDomain: true
+      # - name: tls
+      #   port: 9093
+      #   type: internal
+      #   tls: true
+    storage:
+      type: jbod
+      volumes:
+        - id: 0
+          type: persistent-claim
+          size: 1Gi
+          deleteClaim: false
+    config:
+      # KRaft-specific defaults
+      process.roles: "broker,controller" # broker-only pools will ignore controller
+      controller.quorum.voters: >-
+        0@my-cluster-kafka-0.my-cluster-kafka-brokers.kafka.svc:9094,
+        1@my-cluster-kafka-1.my-cluster-kafka-brokers.kafka.svc:9094,
+        2@my-cluster-kafka-2.my-cluster-kafka-brokers.kafka.svc:9094
+      # your usual Kafka config
+      default.replication.factor: 2
+      min.insync.replicas: 2
+      auto.create.topics.enable: true
+    metricsConfig:
+      type: jmxPrometheusExporter
+      valueFrom:
+        configMapKeyRef:
+          name: kafka-metrics
+          key: kafka-metrics-config.yml
+    resources:
+      requests:
+        memory: 2Gi
+        cpu: "2"
+      limits:
+        memory: 4Gi
+        cpu: "3"
+  # no zookeeper stanza at all!
+  entityOperator:
+    topicOperator:
+      resources:
+        requests:
+          memory: 512Mi
+          cpu: "1"
+        limits:
+          memory: 512Mi
+          cpu: "1"
+    userOperator:
+      resources:
+        requests:
+          memory: 512Mi
+          cpu: "1"
+        limits:
+          memory: 512Mi
+          cpu: "1"
+  # Kafka Exporter still works
+  kafkaExporter:
+    groupRegex: ".*"
+    topicRegex: ".*"
+    livenessProbe:
+      initialDelaySeconds: 15
+      timeoutSeconds: 5
+    readinessProbe:
+      initialDelaySeconds: 15
+      timeoutSeconds: 5

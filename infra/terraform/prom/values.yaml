@@ -20,6 +20,9 @@ grafana:
       labelValue: "1"
 prometheus:
   prometheusSpec:
+    podMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelector: {}
+    podMonitorNamespaceSelector: {}
     externalUrl: https://localhost/prometheus
     routePrefix: /prometheus
     additionalScrapeConfigs:
@@ -47,6 +50,8 @@ prometheus:
         static_configs:
           - targets:
               - "jaeger-query.monitoring.svc.cluster.local:16687"
+      # Strimzi Kafka Exporter metrics
+
 # prometheus.prometheusSpec.routePrefix
 prometheus-node-exporter:
   hostRootFsMount:

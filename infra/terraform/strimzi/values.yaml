@@ -1,0 +1,19 @@
+replicas: 2
+watchAnyNamespace: true
+
+metrics:
+  kafka:
+    enabled: true
+  topicOperator:
+    enabled: true
+  userOperator:
+    enabled: true
+serviceMonitor:
+  enabled: true
+  namespace: monitoring # where your Prometheus lives
+
+# (Optional) Tolerate scheduling on control-plane nodes, etc.
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule

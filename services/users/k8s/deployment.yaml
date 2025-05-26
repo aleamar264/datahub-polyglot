@@ -19,7 +19,7 @@ spec:
           # image: docker.io/library/cognito:latest
           # imagePullPolicy: Never
           image: datahub_polyglot_users:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           resources:
             limits:
               memory: "512Mi"

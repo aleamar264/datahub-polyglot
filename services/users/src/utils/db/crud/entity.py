@@ -44,7 +44,7 @@ class GeneralCrudAsync[T](ABC):
 	@abstractmethod
 	async def update_entity(
 		self,
-		entity_id_id: int,
+		entity_id: int | str,
 		entity_schema: Any,
 		db: AsyncSession,
 		filter: tuple[Any],
@@ -53,12 +53,12 @@ class GeneralCrudAsync[T](ABC):
 
 	@abstractmethod
 	async def delete_entity(
-		self, entity_id: int, db: AsyncSession, filter: tuple[Any]
+		self, entity_id: int | str, db: AsyncSession, filter: tuple[Any]
 	) -> None:
 		pass
 
 	@abstractmethod
-	async def get_entity_by_id(self, entity_id: int, db: AsyncSession) -> T:
+	async def get_entity_by_id(self, entity_id: int | str, db: AsyncSession) -> T:
 		pass
 
 	@abstractmethod

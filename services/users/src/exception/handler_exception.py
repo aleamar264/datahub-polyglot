@@ -4,8 +4,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
-from healthnexus.common.links import BASE_LINK
-from healthnexus.utils.exceptions import (
+from utils.exceptions import (
 	AuthenticationFailed,
 	EntityAlreadyExistsError,
 	EntityDoesNotExistError,
@@ -16,9 +15,11 @@ from healthnexus.utils.exceptions import (
 	TooManyRequest,
 	create_exception_handler,
 )
+from utils.fastapi.utils import get_base_url
 
 
 async def validation_exception_handler(request: Request, exc: ValidationError):
+	base = get_base_url(request)
 	return JSONResponse(
 		status_code=422,
 		content={
@@ -30,7 +31,7 @@ async def validation_exception_handler(request: Request, exc: ValidationError):
 					for error in exc.errors()
 				],
 			},
-			"_links": {"self": f"{BASE_LINK}{request.url.path}"},
+			"_links": {"self": "".join((base, request.url.path))},
 		},
 	)
 

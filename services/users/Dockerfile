@@ -27,6 +27,8 @@ WORKDIR /app
 # Copy the environment, but not the source code
 COPY --from=builder --chown=app:app /app/.venv /app/.venv
 COPY src .
+COPY prod.env .env
+ENV OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger-collector.monitoring.svc.cluster.local:4318/v1/traces
 
 # Run the application
 CMD ["/app/.venv/bin/granian", "--interface", "asgi", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "main:app"]

@@ -1,11 +1,47 @@
-from fastapi import FastAPI, status
+import logfire
+from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+from logfire import instrument_fastapi, instrument_system_metrics
+from opentelemetry.trace import Span
 
+from common.broker import kafka_router
+from exception.handler_exception import CreateHandlerExceptions
+from routes.auth import router as auth_router
 from routes.profile import profile_router
 from routes.users import router
 from schema.users import HealthCheck
 
 origin = ["*"]
+
+def server_request_hook(span: Span, scope: dict):
+    """
+    Hook to customize span attributes and naming.
+    """
+    if not span.is_recording():
+        return
+
+    # Extract request from ASGI scope
+    request = Request(scope)
+    method = request.method
+    route = scope.get("route")
+    route_path = route.path if route else request.url.path
+
+    # Set better span name
+    span.update_name(f"{method} {route_path}")
+
+    # Semantic attributes
+    span.set_attribute("http.method", method)
+    span.set_attribute("http.route", route_path)
+    span.set_attribute("http.target", request.url.path)
+    span.set_attribute("http.scheme", request.url.scheme)
+    span.set_attribute("http.host", request.url.hostname)
+
+    # Optional: function and module
+    endpoint = scope.get("endpoint")
+    if endpoint:
+        span.set_attribute("code.function", endpoint.__name__)
+        span.set_attribute("code.namespace", endpoint.__module__)
+
 app = FastAPI(
 	docs_url="/docs",
 	redoc_url="/redoc",
@@ -14,6 +50,7 @@ app = FastAPI(
 	title="User Service API",
 	description="This is the User Service API, which provides endpoints for user management.",
 )
+
 
 app.add_middleware(
 	CORSMiddleware,
@@ -25,6 +62,8 @@ app.add_middleware(
 
 app.include_router(router)
 app.include_router(profile_router)
+app.include_router(auth_router)
+app.include_router(kafka_router)
 
 
 @app.get(
@@ -43,6 +82,13 @@ def get_health() -> HealthCheck:
 	services which rely on proper functioning of the API service will not deploy if this
 	endpoint returns any other HTTP status code except 200 (OK).
 	Returns:
-	    HealthCheck: Returns a JSON response with the health status
+		HealthCheck: Returns a JSON response with the health status
 	"""
 	return HealthCheck(status="OK")
+
+
+CreateHandlerExceptions(app)
+logfire.configure(service_name="user_services")
+
+instrument_fastapi(app=app, capture_headers=True, server_request_hook=server_request_hook)
+instrument_system_metrics()

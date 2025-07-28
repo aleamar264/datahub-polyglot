@@ -1,3 +1,7 @@
 .venv
 uv.lock
 .terraform
+.mypy*
+.ruff*
+.vscode
+*.env

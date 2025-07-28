@@ -23,7 +23,7 @@ provider "kubernetes" {
 
 # Configure the Helm provider to talk to the same cluster
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     config_path    = "~/.kube/config"
     config_context = "kind-desktop" # optional
   }

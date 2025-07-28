@@ -1,4 +1,4 @@
-resource "helm_release" "traefik" {
+resource "helm_release" "traefik_module" {
 
 
   name             = "traefik"

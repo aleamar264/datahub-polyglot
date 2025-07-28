@@ -3,15 +3,10 @@ from collections.abc import AsyncIterator
 from typing import Annotated
 
 from fastapi import Depends
-from sqlalchemy.ext.asyncio import (
-	AsyncSession,
-)
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from .async_database_manager import AsyncDatabaseManager
-from .general import (
-	DefineGeneralDb,
-	ReadEnvDatabaseSettings,
-)
+from .general import DefineGeneralDb, ReadEnvDatabaseSettings
 
 # import logfire
 

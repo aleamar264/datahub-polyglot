@@ -2,7 +2,7 @@ apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaNodePool
 metadata:
   name: dual-role
-  namespace: strimzi
+  namespace: kafka
   labels:
     strimzi.io/cluster: my-cluster
 spec:
@@ -23,7 +23,7 @@ apiVersion: kafka.strimzi.io/v1beta2
 kind: Kafka
 metadata:
   name: my-cluster
-  namespace: strimzi
+  namespace: kafka
   annotations:
     # enable KRaft (ZooKeeper-less) mode
     strimzi.io/kraft: "enabled"

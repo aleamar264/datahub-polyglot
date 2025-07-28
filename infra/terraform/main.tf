@@ -9,21 +9,13 @@ module "prom" {
 
 }
 
+# module "tracing" {
+#   source = "./tracing"
 
-module "tracing" {
-  source = "./tracing"
-
-}
+# }
 
 module "metrics" {
   source = "./metrics"
-
-}
-
-
-module "traefik" {
-  source     = "./traefik_tf"
-  depends_on = [module.metallb, module.prom, module.tracing]
 
 }
 

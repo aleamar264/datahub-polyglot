@@ -2,6 +2,9 @@ import contextlib
 from collections.abc import AsyncIterator
 from typing import override
 
+import logfire
+from icecream import icecream
+from logfire import instrument_sqlalchemy
 from loguru import logger
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import (
@@ -41,9 +44,12 @@ class AsyncDatabaseManager(AsyncDatabaseSessionManager):
 		"""
 		super().__init__(db_params)
 		url = self.create_url()
+		icecream.ic(url)
 		self.engine: AsyncEngine | None = create_async_engine(
 			url, pool_size=50, max_overflow=0, pool_recycle=1800, pool_timeout=10
 		)
+		logfire.configure()
+		instrument_sqlalchemy(engine=self.engine)
 		self._sessionmaker: async_sessionmaker[AsyncSession] = async_sessionmaker(
 			autocommit=False, bind=self.engine
 		)

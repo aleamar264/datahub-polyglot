@@ -20,6 +20,9 @@ spec:
           # imagePullPolicy: Never
           image: datahub_polyglot_users:latest
           imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: other-envs
           resources:
             limits:
               memory: "512Mi"
@@ -30,11 +33,16 @@ spec:
           readinessProbe:
             httpGet:
               port: 8000
-              path: /users/docs
-            initialDelaySeconds: 15
+              path: /users/health
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
           livenessProbe:
             httpGet:
               port: 8000
-              path: /users/docs
-            initialDelaySeconds: 15
-            periodSeconds: 15
+              path: /users/health
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3

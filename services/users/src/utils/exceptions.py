@@ -3,8 +3,7 @@ from collections.abc import Callable
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 
-from healthnexus.common.links import BASE_LINK
-from healthnexus.schemas.error import ErrorMessage, Links, ReportExportTask
+from utils.fastapi.utils import get_base_url
 
 
 class ApiError(Exception):
@@ -26,13 +25,14 @@ def create_exception_handler(
 
 	async def exception_handler(request: Request, exc: ApiError) -> JSONResponse:
 		detail["message"] = exc.message
+		base_url = get_base_url(request)
 		# logger.error(exc)
 		return JSONResponse(
 			status_code=status_code,
-			content=ReportExportTask(
-				_embedded=ErrorMessage(**detail),
-				_links=Links(self=f"{BASE_LINK}{request.url.path}"),
-			).model_dump(by_alias=True),
+			content={
+				"_embedded": detail,
+				"_links": {"self": f"{base_url}/{request.url.path}"},
+			},
 		)
 
 	return exception_handler  # type: ignore

@@ -26,7 +26,7 @@ async def root(request: Request) -> dict[str, Any]:
 	## Get Profile
 	Endpoint to get the profile information of the user.
 	Returns:
-	    dict[str, Any]: Returns a dict response with the profile information
+		dict[str, Any]: Returns a dict response with the profile information
 	"""
 	base_url = get_base_url(request)
 	return {
@@ -72,7 +72,7 @@ async def profile_description(request: Request) -> dict[str, Any]:
 	## Get Profile Description
 	Endpoint to get the profile description of the user.
 	Returns:
-	    dict[str, Any]: Returns a dict response with the profile description
+		dict[str, Any]: Returns a dict response with the profile description
 	"""
 	return {
 		"resources": {

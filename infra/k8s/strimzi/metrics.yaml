@@ -2,7 +2,7 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: kafka-metrics
-  namespace: strimzi
+  namespace: kafka
 data:
   kafka-metrics-config.yml: |
     # See https://github.com/prometheus/jmx_exporter for more info about JMX Prometheus Exporter metrics

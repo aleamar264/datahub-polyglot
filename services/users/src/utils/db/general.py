@@ -24,11 +24,11 @@ class ReadEnvDatabaseSettings(BaseSettings):
 	"""  # noqa: E101
 
 	drivername: str = Field("postgresql+asyncpg", description="Database Driver")
-	HEALTHNEXUS_DB_USER: str = Field(..., description="Database Username")
-	HEALTHNEXUS_DB_PASSWORD: str = Field(..., description="Database Password")
-	HEALTHNEXUS_DB_HOST: str = Field(..., description="Database Host")
-	HEALTHNEXUS_DB_SCHEMA: str = Field(..., description="Database Name")
-	HEALTHNEXUS_DB_PORT: int = Field(..., description="Database Port")
+	username: str = Field(..., description="Database Username")
+	password: str = Field(..., description="Database Password")
+	host: str = Field(..., description="Database Host")
+	database: str = Field(..., description="Database Name")
+	port: int = Field(..., description="Database Port")
 
 	model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
@@ -44,11 +44,11 @@ class DefineGeneralDb(BaseModel):
 		description="Database Driver",
 		examples=["mysql+pymysql", "postgresql+psycopg2", "postgresql+asyncpg"],
 	)
-	HEALTHNEXUS_DB_USER: str = Field(..., description="Database Username")
-	HEALTHNEXUS_DB_PASSWORD: str = Field(..., description="Database Password")
-	HEALTHNEXUS_DB_HOST: str = Field(..., description="Database Host")
-	HEALTHNEXUS_DB_SCHEMA: str = Field(..., description="Database Name")
-	HEALTHNEXUS_DB_PORT: int = Field(..., description="Database Port")
+	username: str = Field(..., description="Database Username")
+	password: str = Field(..., description="Database Password")
+	host: str = Field(..., description="Database Host")
+	database: str = Field(..., description="Database Name")
+	port: int = Field(..., description="Database Port")
 
 
 class BaseSessionManager:
@@ -73,12 +73,12 @@ class BaseSessionManager:
 			URL: Async Url
 		"""
 		return URL.create(
-			database=self.db_params.HEALTHNEXUS_DB_SCHEMA,
-			username=self.db_params.HEALTHNEXUS_DB_USER,
+			database=self.db_params.database,
+			username=self.db_params.username,
 			drivername=self.db_params.drivername,
-			host=self.db_params.HEALTHNEXUS_DB_HOST,
-			password=self.db_params.HEALTHNEXUS_DB_PASSWORD,
-			port=self.db_params.HEALTHNEXUS_DB_PORT,
+			host=self.db_params.host,
+			password=self.db_params.password,
+			port=self.db_params.port,
 		)
 
 

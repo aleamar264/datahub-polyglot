@@ -8,7 +8,7 @@ from repository.user import UserRepository
 from schema.general import Link, UserLinks, UserResponse, UserUpdate
 from schema.users import FilterParameters, PaginationResponse, Response
 from utils.db.async_db_conf import depend_db_annotated
-from utils.fastapi.utils import get_base_url
+from utils.fastapi.base_url import get_base_url
 
 router = APIRouter(prefix="/users", tags=["users"])
 user_repository = UserRepository(model=UserModels)

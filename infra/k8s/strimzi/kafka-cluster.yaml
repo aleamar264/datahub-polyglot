@@ -80,19 +80,19 @@ spec:
     topicOperator:
       resources:
         requests:
-          memory: 512Mi
-          cpu: "1"
+          memory: 1Gi
+          cpu: "2"
         limits:
-          memory: 512Mi
-          cpu: "1"
+          memory: 1Gi
+          cpu: "2"
     userOperator:
       resources:
         requests:
-          memory: 512Mi
-          cpu: "1"
+          memory: 1Gi
+          cpu: "2"
         limits:
-          memory: 512Mi
-          cpu: "1"
+          memory: 1Gi
+          cpu: "2"
   # Kafka Exporter still works
   kafkaExporter:
     groupRegex: ".*"

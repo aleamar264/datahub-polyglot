@@ -8,9 +8,18 @@ from fastapi.responses import JSONResponse
 from common.broker import broker
 from models.users import Users as UserModels
 from repository.user import UserRepository
-from schema.general import AuthLinks, Link, ResponseCreationUser, UserCreation, UserSave
+from schema.general import (
+	AuthLinks,
+	Link,
+	ResponseCreationUser,
+	ResponseCreationUserData,
+	UserCreation,
+	UserSave,
+	WelcomeUser,
+)
 from utils.db.async_db_conf import depend_db_annotated
-from utils.fastapi.utils import get_base_url
+from utils.fastapi.base_url import get_base_url
+from utils.fastapi.utils import verify_token
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -59,14 +68,26 @@ async def create_user(
 		password_hash=ph.hash(body.password),
 	)
 	user = await user_repository.create_entity(new_user, db)
-	return_user_created = ResponseCreationUser(
-		message="User created", user=body.email, id=user.id
+	data_user = ResponseCreationUserData(user=body.email, id=user.id)
+	return_user_created = ResponseCreationUser(message="User created", data=data_user)
+	await broker.publish(
+		message=WelcomeUser(**data_user.model_dump(), full_name=user.full_name),
+		topic="user.created",
 	)
-	await broker.publish(message=return_user_created, topic="user.created")
 	return return_user_created
 
 
-@router.post("/verify-email", response_class=JSONResponse)
-async def verify_email(token: Annotated[str, Query()], db: depend_db_annotated, request: Request)-> JSONResponse:
-	return JSONResponse(content="", status_code=status.HTTP_200_OK)
-
+@router.get("/verify-email", response_class=JSONResponse)
+async def verify_email(
+	token: Annotated[str, Query()], db: depend_db_annotated, request: Request
+) -> JSONResponse:
+	id = verify_token(token_to_verify=token)
+	await user_repository.update_entity(
+		db=db,
+		entity_id=id,
+		filter=(),
+		entity_schema={"email_verified": True},  # type: ignore
+	)
+	return JSONResponse(
+		content=f"The user {id} was verified", status_code=status.HTTP_200_OK
+	)

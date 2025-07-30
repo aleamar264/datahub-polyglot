@@ -22,7 +22,7 @@ class Users(Base, MixInNameTable):
 	)
 	password_hash: Mapped[str] = mapped_column(VARCHAR(255), unique=False)
 	role: Mapped[str] = mapped_column(sql_enum(Role), index=True)
-	email_verifies: Mapped[bool] = mapped_column(BOOLEAN, nullable=False, default=False)
+	email_verified: Mapped[bool] = mapped_column(BOOLEAN, nullable=False, default=False)
 	created_at: Mapped[datetime] = mapped_column(
 		TIMESTAMP(timezone=True), nullable=False, default=datetime.now(UTC), index=True
 	)

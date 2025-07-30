@@ -1,6 +1,5 @@
-from faststream.kafka.fastapi import KafkaRouter, KafkaBroker
+from faststream.kafka.fastapi import KafkaRouter
 from faststream.kafka.opentelemetry import KafkaTelemetryMiddleware
-
 
 kafka_router = KafkaRouter(
 	bootstrap_servers=[

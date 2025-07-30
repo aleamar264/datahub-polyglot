@@ -3,7 +3,7 @@ from collections.abc import Callable
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 
-from utils.fastapi.utils import get_base_url
+from utils.fastapi.base_url import get_base_url
 
 
 class ApiError(Exception):

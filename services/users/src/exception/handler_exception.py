@@ -15,7 +15,7 @@ from utils.exceptions import (
 	TooManyRequest,
 	create_exception_handler,
 )
-from utils.fastapi.utils import get_base_url
+from utils.fastapi.base_url import get_base_url
 
 
 async def validation_exception_handler(request: Request, exc: ValidationError):

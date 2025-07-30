@@ -168,7 +168,7 @@ class UserBase(BaseModel):
 class UserAttributes(BaseModel):
 	is_active: bool = Field(default=True)
 	role: Role = Field(default=Role.USER)
-	email_verifies: bool = Field(default=False)
+	email_verified: bool = Field(default=False)
 	last_login_at: datetime | None = None
 	login_attempts: int = Field(default=0)
 	updated_at: datetime | None = None
@@ -257,7 +257,15 @@ class AuthLinks(BaseModel):
 	}
 
 
-class ResponseCreationUser(BaseModel):
-	message: str
+class ResponseCreationUserData(BaseModel):
 	user: str
 	id: UUID
+
+
+class ResponseCreationUser(BaseModel):
+	message: str
+	data: ResponseCreationUserData
+
+
+class WelcomeUser(ResponseCreationUserData):
+	full_name: str

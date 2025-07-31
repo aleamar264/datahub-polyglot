@@ -28,3 +28,7 @@ module "kafka" {
   source = "./strimzi"
 
 }
+
+module "redis" {
+  source = "./redis"
+}

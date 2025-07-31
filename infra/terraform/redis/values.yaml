@@ -1,0 +1,19 @@
+auth:
+  enabled: true
+  password: "test-redis"
+
+master:
+  persistence:
+    enabled: true
+    size: 1Gi
+    storageClass: "standard"
+
+replica:
+  persistence:
+    enabled: true
+    size: 1Gi
+    storageClass: "standard"
+
+# Number of Redis replicas
+replica:
+  replicaCount: 2

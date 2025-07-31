@@ -7,6 +7,7 @@ from uuid import uuid4
 from argon2 import PasswordHasher
 from fastapi import APIRouter, Body, Depends, Query, Request, status
 from pydantic import EmailStr
+from redis import RedisError
 from redis.asyncio import Redis
 
 from common.broker import broker
@@ -28,7 +29,7 @@ from schema.general import (
 )
 from utils.db.async_db_conf import depend_db_annotated
 from utils.dependencies.redis_cache import get_master, get_replica
-from utils.exceptions import EntityDoesNotExistError, InvalidTokenError
+from utils.exceptions import EntityDoesNotExistError, InvalidTokenError, ServiceError
 from utils.fastapi.base_url import get_base_url
 from utils.fastapi.utils import verify_token
 
@@ -37,6 +38,9 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 user_repository = UserRepository(model=UserModels)
 ph = PasswordHasher()
 logger = logging.getLogger("user_events")
+
+REDIS_TOKEN_EXPIRY = 900
+REDIS_PREFIX = "password-reset-token:"
 
 
 def create_auth_links(request: Request, title: str, rel: str = "self") -> AuthLinks:
@@ -277,9 +281,14 @@ async def request_password_reset(
 	user = await find_user_by_email(db=db, email=body.email)
 	uuid_reset = uuid4()
 	user_encode = json.dumps({"id": str(user.id)})
-	await redis.setex(
-		name=f"pasword-reset-token:{str(uuid_reset)}", value=user_encode, time=900
-	)
+	try:
+		await redis.setex(
+			name=f"{REDIS_PREFIX}:{str(uuid_reset)}",
+			value=user_encode,
+			time=REDIS_TOKEN_EXPIRY,
+		)
+	except RedisError as redis_error:
+		raise ServiceError("Cache service unavailable") from redis_error
 	await broker.publish(
 		message=ResetPasswordToken(token=str(uuid_reset), user=user.email),
 		topic="user.reset_requested",
@@ -299,7 +308,7 @@ async def reset_password(
 	redis: Annotated[Redis, Depends(get_replica)],
 	body: ResetPassword,
 ) -> Response:
-	redis_value: str = await redis.get(name=f"pasword-reset-token:{body.token}")
+	redis_value: str = await redis.get(name=f"{REDIS_PREFIX}:{body.token}")
 	if redis_value is None:
 		raise InvalidTokenError(message="The token already expired or is incorrect")
 	id: str = json.loads(redis_value)["id"]

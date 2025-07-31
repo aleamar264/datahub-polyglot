@@ -187,8 +187,8 @@ class UserResponse(UserBase, UserAttributes):
 
 
 class CreationPassword(BaseModel):
-	password: str = Field(...)
-	password2: str = Field(...)
+	password: str = Field(..., min_length=8)
+	password2: str = Field(..., min_length=8)
 
 	@model_validator(mode="after")
 	def validate_password(self) -> Self:

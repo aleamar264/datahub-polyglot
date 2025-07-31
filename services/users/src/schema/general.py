@@ -1,5 +1,5 @@
 from datetime import UTC, datetime
-from typing import Self
+from typing import Any, Self
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
@@ -186,7 +186,7 @@ class UserResponse(UserBase, UserAttributes):
 	model_config = ConfigDict(from_attributes=True)
 
 
-class UserCreation(UserBase):
+class CreationPassword(BaseModel):
 	password: str = Field(...)
 	password2: str = Field(...)
 
@@ -201,6 +201,9 @@ class UserCreation(UserBase):
 					one o more special character (!@#$%^&*()_+)"
 			)
 		return self
+
+
+class UserCreation(UserBase, CreationPassword): ...
 
 
 class UserUpdate(BaseModel):
@@ -228,25 +231,51 @@ class AuthLinks(BaseModel):
 		description="Self link pointing to the user's profile or details",
 	)
 	register: Link | None = Field(None, description="Link to register user")
+	verify_email: Link | None = Field(None, description="Link to verify the user email")
+	resend_verification_email: Link | None = Field(
+		None, description="Link to resend email verification"
+	)
+	request_reset_password: Link | None = Field(
+		None, description="Link to request reset password"
+	)
+	reset_password: Link | None = Field(None, description="Link to reset password")
 	login: Link | None = Field(None, description="Link to login")
 	model_config = {
 		"json_schema_extra": {
 			"examples": [
 				{
 					"self": {
-						"href": "https://example.com/auth/",
+						"href": "https://example.com/users/auth/",
 						"rel": "self",
 						"method": "GET",
 						"title": "User Profile",
 					},
 					"register": {
-						"href": "https://example.com/auth/register",
+						"href": "https://example.com/users/auth/register",
 						"rel": "auth_register",
 						"method": "POST",
 						"title": "Auth Registration",
 					},
+					"verify_email": {
+						"href": "https://example.com/users/auth/verify-email",
+						"rel": "verify_email",
+						"method": "GET",
+						"title": "Verify user by email",
+					},
+					"resend_verify_email": {
+						"href": "https://example.com/users/auth/resend-verification",
+						"rel": "resend_email_verification",
+						"method": "POST",
+						"title": "Resend email verification",
+					},
+					"reset_password": {
+						"href": "https://example.com/users/auth//request-password-reset",
+						"rel": "reset_password",
+						"method": "POST",
+						"title": "Reset Password",
+					},
 					"login": {
-						"href": "https://example.com/auth/login",
+						"href": "https://example.com/users/auth/login",
 						"rel": "auth_login",
 						"method": "POST",
 						"title": "Auth Login",
@@ -263,9 +292,30 @@ class ResponseCreationUserData(BaseModel):
 
 
 class ResponseCreationUser(BaseModel):
-	message: str
 	data: ResponseCreationUserData
 
 
 class WelcomeUser(ResponseCreationUserData):
 	full_name: str
+
+
+class ResendEmailVerification(BaseModel):
+	email: EmailStr
+
+
+class Embedded(BaseModel):
+	message: Any
+
+
+class Response(BaseModel):
+	embedded: Embedded = Field(alias="_embedded", default=...)
+	links: Any = Field(alias="_links", default=...)
+
+
+class ResetPasswordToken(BaseModel):
+	token: str
+	user: EmailStr
+
+
+class ResetPassword(CreationPassword):
+	token: str

@@ -5,12 +5,12 @@ from logfire import instrument_fastapi, instrument_system_metrics
 
 from common.broker import kafka_router
 from exception.handler_exception import CreateHandlerExceptions
+from routes import kafka_user
 from routes.auth import router as auth_router
 from routes.profile import profile_router
 from routes.users import router
 from schema.users import HealthCheck
 from utils.fastapi.observability.otel import server_request_hook
-from routes import kafka_user
 
 origin = ["*"]
 

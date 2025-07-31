@@ -9,6 +9,20 @@ spec:
     burst: 10
 ---
 apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: ratelimit-resend-verification
+  namespace: traefik
+spec:
+  rateLimit:
+    period: 1h
+    average: 2
+    burst: 5
+    sourceCriterion:
+      ipStrategy:
+        depth: 1
+---
+apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: users-ingress
@@ -39,6 +53,19 @@ spec:
           port: 8000
       middlewares:
         - name: ratelimit-register
+          namespace: traefik
+      observability:
+        metrics: true
+        tracing: true
+    - match: "Host(`localhost`) && PathPrefix(`/users/verify-email`)"
+      kind: Rule
+      services:
+        - kind: Service
+          name: users-service
+          # namespace: users
+          port: 8000
+      middlewares:
+        - name: ratelimit-resend-verification
           namespace: traefik
       observability:
         metrics: true

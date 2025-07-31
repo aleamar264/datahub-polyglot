@@ -34,28 +34,28 @@ async def root(request: Request) -> dict[str, Any]:
 		"api_version": "0.0.1",
 		"links": {
 			"self": Link(
-				href=f"{base_url}/", rel="self", method="GET", title="API Root"
+				href=f"{base_url}/users/", rel="self", method="GET", title="API Root"
 			),
 			"documentation": Link(
-				href=f"{base_url}/docs",
+				href=f"{base_url}/users/docs",
 				rel="documentation",
 				method="GET",
 				title="API Documentation",
 			),
 			"redoc": Link(
-				href=f"{base_url}/redoc",
+				href=f"{base_url}/users/redoc",
 				rel="redoc",
 				method="GET",
 				title="API Redoc",
 			),
 			"healthcheck": Link(
-				href=f"{base_url}/health",
+				href=f"{base_url}/users/health",
 				rel="healthcheck",
 				method="GET",
 				title="Health Check",
 			),
 			"profile": Link(
-				href=f"{base_url}/profile/",
+				href=f"{base_url}/users/profile/",
 				rel="profile",
 				method="GET",
 				title="API Semantic",

@@ -1,16 +1,16 @@
 from redis.asyncio import Redis
 
 redis_master = Redis(
-	host="redis-master.caching.svc.cluster.local",
+	host="redis-master.redis.svc.cluster.local",
 	port=6379,
 	decode_responses=True,
-	password="cGFzc3dvcmQ",
+	password="test-redis",
 )
 redis_replica = Redis(
-	host="redis-replicas.caching.svc.cluster.local",
+	host="redis-replicas.redis.svc.cluster.local",
 	port=6379,
 	decode_responses=True,
-	password="cGFzc3dvcmQ",
+	password="test-redis",
 )
 
 

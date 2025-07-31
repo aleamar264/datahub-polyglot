@@ -22,6 +22,7 @@ dependencies = [
     "mailtrap>=2.1.0",
     "itsdangerous>=2.2.0",
     "fastapi-mail>=1.5.0",
+    "redis[asyncio,hiredis]>=6.2.0",
 ]
 
 [dependency-groups]

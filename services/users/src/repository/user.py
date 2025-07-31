@@ -191,7 +191,7 @@ class UserRepository(GeneralCrudAsync[Users]):
 		column: InstrumentedAttribute[Any],
 		entity_schema_value: Any,
 		db: AsyncSession,
-		filter: tuple[Any],
+		filter: tuple[Any] | None = None,
 	) -> Users | None:
 		"""Function that retrieves one entity, using any args.
 
@@ -224,7 +224,8 @@ class UserRepository(GeneralCrudAsync[Users]):
 		model = self.model
 		stmt = lambda_stmt(lambda: select(model))  # type: ignore
 		stmt += lambda s: s.where(column == entity_schema_value)  # type: ignore
-		stmt += lambda s: s.filter(*filter)  # type: ignore
+		if filter:
+			stmt += lambda s: s.filter(*filter)  # type: ignore
 		result = await db.execute(stmt)
 		if (entity_result := result.scalar_one_or_none()) is None:
 			return None
@@ -275,7 +276,7 @@ class UserRepository(GeneralCrudAsync[Users]):
 		entity_id: int | str,
 		entity_schema: dict[str, Any],
 		db: AsyncSession,
-		filter: tuple[Any],
+		filter: tuple[Any] | None = None,
 	) -> Users:
 		"""Function that updates an entity.
 
@@ -310,12 +311,14 @@ class UserRepository(GeneralCrudAsync[Users]):
 
 		"""  # noqa: E101
 		model = self.model
+
 		stmt = (
 			update(model)  # type: ignore
 			.where(model.id == entity_id)  # type: ignore
 			.values(**entity_schema)
-			.filter(*filter)  # type: ignore
 		)  # type: ignore
+		if filter:
+			stmt.filter(*filter)
 		if (await db.execute(stmt)).rowcount == 0:  # type: ignore
 			raise EntityDoesNotExistError(
 				message="No record was updated; it may not exist or values may be the same.",

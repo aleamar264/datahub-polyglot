@@ -11,9 +11,9 @@ passwordUpdateJob:
 
 primary:
   persistence:
-    size: 4Gi
+    size: 2Gi
     storageClass: standard
 readReplicas:
   persistence:
-    size: 4Gi
+    size: 2Gi
     storageClass: standard

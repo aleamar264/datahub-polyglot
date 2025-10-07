@@ -1,3 +1,19 @@
+global:
+  security:
+    allowInsecureImages: true
+
+image:
+  registry: registry-1.docker.io
+  repository: bitnamisecure/redis
+  tag: latest
+
+metrics:
+    enabled: true
+    image:
+      registry: registry-1.docker.io
+      repository: bitnamisecure/redis-exporter
+      tag: latest
+
 auth:
   enabled: true
   password: "test-redis"
@@ -9,11 +25,9 @@ master:
     storageClass: "standard"
 
 replica:
+  replicaCount: 2
   persistence:
     enabled: true
     size: 1Gi
     storageClass: "standard"
 
-# Number of Redis replicas
-replica:
-  replicaCount: 2

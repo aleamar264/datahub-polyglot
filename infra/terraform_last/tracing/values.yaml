@@ -1,8 +1,30 @@
+# image:
+#   registry: registry-1.docker.io
+#   repository: bitnamisecure/jaeger
+#   tag: latest
+global:
+  security:
+    allowInsecureImages: true
+cqlshImage:
+  registry: docker.io
+  repository: bitnamilegacy/cassandra
+  tag: 5.0.5-debian-12-r7
+
 cassandra:
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/cassandra
+    tag: 5.0.5-debian-12-r7
+
   persistence:
     enabled: true
-    storageClass: standard # Set this to an available storage class
-    size: 2Gi # Example size, adjust based on your needs
+    storageClass: standard
+    size: 2Gi
+
+image:
+  registry: docker.io
+  repository: bitnamilegacy/jaeger
+  tag: 2.9.0-debian-12-r1
 
 query:
   extraEnvVars:

@@ -1,3 +1,9 @@
+extraEnvs:
+  # Required to bypass this bug.
+  # https://github.com/strimzi/strimzi-kafka-operator/issues/11386
+  - name: STRIMZI_KUBERNETES_VERSION
+    value: "major=1,minor=34"
+
 replicas: 2
 watchAnyNamespace: true
 
@@ -13,6 +19,7 @@ serviceMonitor:
   namespace: monitoring # where your Prometheus lives
 
 # (Optional) Tolerate scheduling on control-plane nodes, etc.
+# This is when you are using KinD 
 tolerations:
   - key: node-role.kubernetes.io/control-plane
     operator: Exists

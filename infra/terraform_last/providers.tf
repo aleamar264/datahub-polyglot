@@ -15,13 +15,13 @@ terraform {
 # Configure the Kubernetes provider to use your local kubeconfig
 provider "kubernetes" {
   config_path    = "~/.kube/config"
-  config_context = "kind-desktop" # optional, defaults to current-context
+  config_context = "docker-desktop" # optional, defaults to current-context
 }
 
 # Configure the Helm provider to talk to the same cluster
 provider "helm" {
   kubernetes = {
     config_path    = "~/.kube/config"
-    config_context = "kind-desktop" # optional
+    config_context = "docker-desktop" # optional
   }
 }

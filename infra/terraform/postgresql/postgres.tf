@@ -6,7 +6,7 @@ resource "helm_release" "postgresql" {
   repository       = "oci://registry-1.docker.io/bitnamicharts"
   chart            = "postgresql"
   namespace        = "postgresql"
-  version          = "16.0.0"
+  version          = "18.0.7"
   create_namespace = true
   values           = [file("${path.module}/values.yaml")]
 }

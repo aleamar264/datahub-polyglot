@@ -13,6 +13,12 @@ metrics:
       registry: registry-1.docker.io
       repository: bitnamisecure/redis-exporter
       tag: latest
+    serviceMonitor:
+      enabled: true
+      namespace: "monitoring"
+      interval: 10s
+      scrapeTimeout: 5s
+      
 
 auth:
   enabled: true

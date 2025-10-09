@@ -32,3 +32,8 @@ module "kafka" {
 module "redis" {
   source = "./redis"
 }
+
+module "mongo" {
+  source = "./mongodb"
+  depends_on = [ module.prom ]
+}

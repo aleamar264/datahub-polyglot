@@ -1,0 +1,92 @@
+global:
+  security:
+    allowInsecureImages: true
+
+image:
+  registry: registry-1.docker.io
+  repository: bitnamisecure/mongodb
+  tag: latest
+
+metrics:
+  enabled: true
+  image:
+    registry: registry-1.docker.io
+    repository: bitnamisecure/mongodb-exporter
+    tag: latest
+  serviceMonitor:
+    enabled: true
+    namespace:  "monitoring"
+    interval: 10s
+    scrapeTimeout: 5s
+    labels:
+      release: kube-prometheus-stackr
+    selector:
+      # matchLabels:
+        app.kubernetes.io/component: metrics
+        app.kubernetes.io/instance: mongodb
+    jobLabel: "mongodb"
+  prometheusRule:
+    enabled: true
+    namespace: "monitoring"
+    rules:
+        - alert: MongoDBDown
+          expr: up{job="mongodb"} == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "MongoDB instance down"
+            description: "MongoDB instance has been down for more than 1 minute."
+
+        - alert: MongoHighConnections
+          expr: mongodb_connections{state="current"} > 100
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "MongoDB has high number of current connections"
+            description: "More than 100 connections for 5 minutes."
+
+        - alert: MongoReplicationLag
+          expr: (avg(mongodb_replset_member_optime_date{state="PRIMARY"}) - avg(mongodb_replset_member_optime_date{state="SECONDARY"})) > 10
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High replication lag in MongoDB"
+            description: "Difference between primary and secondary replication optime is greater than 10s"
+
+        - alert: MongoMemoryUsageHigh
+          expr: (sum(mongodb_memory{type="mapped"}) / sum(mongodb_memory{type="virtual"})) > 0.9
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "MongoDB memory usage near full"
+            description: "Mapped memory / virtual memory > 90%"
+
+        - alert: MongoCursorTimeouts
+          expr: increase(mongodb_metrics_cursor_timed_out_total[1m]) > 100
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High number of MongoDB cursor timeouts"
+            description: "Cursor timeouts > 100 in the last minute"
+
+        - alert: MongoConnectionsUsage
+          expr: mongodb_connections{state="current"} / mongodb_connections{state="available"} > 0.8
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "MongoDB connection usage high"
+            description: "More than 80% of available connections in use"
+
+architecture: replicaset
+useStatefulSet: true
+
+persistence:
+  enabled: true
+  storageClass: "standard"
+  size: 4Gi

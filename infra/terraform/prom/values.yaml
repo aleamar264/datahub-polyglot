@@ -42,7 +42,7 @@ prometheus:
         scheme: http
         static_configs:
           - targets:
-              - "jaeger-collector.monitoring.svc.cluster.local:14269"
+              - "jaeger-collector.monitoring.svc.cluster.local:8888"
       - job_name: jaeger-query
         metrics_path: "/metrics"
         scrape_interval: 10s
@@ -50,7 +50,7 @@ prometheus:
         scheme: http
         static_configs:
           - targets:
-              - "jaeger-query.monitoring.svc.cluster.local:16687"
+              - "jaeger-query.monitoring.svc.cluster.local:8888"
       # Strimzi Kafka Exporter metrics
 
 # prometheus.prometheusSpec.routePrefix

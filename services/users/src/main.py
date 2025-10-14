@@ -1,3 +1,4 @@
+import icecream
 import logfire
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,6 +11,7 @@ from routes.auth import router as auth_router
 from routes.profile import profile_router
 from routes.users import router
 from schema.users import HealthCheck
+from utils.fastapi.observability.logfire_settings import _env
 from utils.fastapi.observability.otel import server_request_hook
 
 origin = ["*"]
@@ -60,7 +62,11 @@ def get_health() -> HealthCheck:
 
 
 CreateHandlerExceptions(app)
-logfire.configure(service_name="user_services")
+
+logfire.configure(
+	service_name="user_services", token=_env.token, environment=_env.environment,
+	send_to_logfire="if-token-present"
+)
 
 instrument_fastapi(
 	app=app, capture_headers=True, server_request_hook=server_request_hook

@@ -27,7 +27,8 @@ WORKDIR /app
 # Copy the environment, but not the source code
 COPY --from=builder --chown=app:app /app/.venv /app/.venv
 COPY src .
-COPY prod.env .env
+COPY .prod.env .env
+COPY other_env.env other_env.env
 ENV OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger-collector.monitoring.svc.cluster.local:4318/v1/traces
 
 # Run the application

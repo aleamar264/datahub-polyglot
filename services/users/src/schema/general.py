@@ -1,10 +1,11 @@
+import re
 from datetime import UTC, datetime
 from typing import Any, Self
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
+
 from common.role import Role
-import re
 from utils.exceptions import GeneralError
 
 

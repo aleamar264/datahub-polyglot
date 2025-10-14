@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from fastapi_mail import MessageSchema, MessageType
 from faststream.kafka.fastapi import Logger
 

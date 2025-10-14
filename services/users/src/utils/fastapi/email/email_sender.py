@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from fastapi_mail import ConnectionConfig, FastMail, MessageSchema, MessageType
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict

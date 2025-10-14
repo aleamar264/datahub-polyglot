@@ -30,7 +30,7 @@ class ReadEnvDatabaseSettings(BaseSettings):
 	database: str = Field(..., description="Database Name")
 	port: int = Field(..., description="Database Port")
 
-	model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+	model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
 
 class DefineGeneralDb(BaseModel):

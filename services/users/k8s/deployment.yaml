@@ -21,8 +21,8 @@ spec:
           image: datahub_polyglot_users:latest
           imagePullPolicy: Always
           envFrom:
-            - configMapRef:
-                name: other-envs
+            # - configMapRef:
+            #     name: other-envs
           resources:
             limits:
               memory: "512Mi"

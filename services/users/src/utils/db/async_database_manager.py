@@ -16,6 +16,7 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from utils.exceptions import ServiceError
+from utils.fastapi.observability.logfire_settings import _env
 
 from .general import AsyncDatabaseSessionManager, DefineGeneralDb
 
@@ -48,7 +49,12 @@ class AsyncDatabaseManager(AsyncDatabaseSessionManager):
 		self.engine: AsyncEngine | None = create_async_engine(
 			url, pool_size=50, max_overflow=0, pool_recycle=1800, pool_timeout=10
 		)
-		logfire.configure()
+		logfire.configure(
+			service_name="user_services",
+			token=_env.token,
+			environment=_env.environment,
+			send_to_logfire="if-token-present",
+		)
 		instrument_sqlalchemy(engine=self.engine)
 		self._sessionmaker: async_sessionmaker[AsyncSession] = async_sessionmaker(
 			autocommit=False, bind=self.engine
